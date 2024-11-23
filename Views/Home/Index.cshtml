@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	<link rel="stylesheet" href="~/css/padrao.css">
+	<title>Login</title>
+</head>
+
+<body>
+	<div class="header">
+		<h1 class="textPrincipal">GoodStudy</h1>
+	</div>
+	<div class="body" ng-app="loginApp" ng-controller="loginCtrl">
+		<div class="containerRedondo">
+			<div class="content">
+				<div>
+					<input type="email" ng-model="email" placeholder="Email">
+				</div>
+				<div class="password-container">
+					<input id="passwordText" ng-model="password" type="password" placeholder="Password">
+					<span class="password-toggle-icon" onclick="changePasswordVisibility()"><i id="eyeIcon" class="fas fa-eye"></i></span>
+				</div>
+				<div>
+					<button ng-click="login()" class="buttonRedondo">Login</button>
+				</div>
+				<div>
+					<button class="buttonRedondo">Login Anônimo</button>
+				</div>
+				<div>
+					<!----><button ng-click="criarConta()" class="buttonRedondo">Criar Conta</button>
+					<!--<a asp-controller="Home" asp-action="CConta" class="buttonRedondo">Criar Conta</a>-->
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+<script>
+	function changePasswordVisibility() {
+		var passwordTextType = document.getElementById("passwordText");
+		var eyeIcon = document.getElementById("eyeIcon");
+		if (passwordTextType.type === "password") {
+			eyeIcon.classList.remove("fa-eye");
+			eyeIcon.classList.add("fa-eye-slash");
+			passwordTextType.type = "text";
+		} else {
+			passwordTextType.type = "password";
+			eyeIcon.classList.remove("fa-eye-slash");
+			eyeIcon.classList.add("fa-eye");
+		}
+	}
+
+	var app = angular.module("loginApp", []);
+
+	app.controller('loginCtrl', function ($scope, $http) {
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('utilizador');
+		//$scope.email= "ff@email.com";//testes retirar
+		//$scope.password= "ff123";//testes retirar
+		$scope.login = function (){
+			if(!$scope.email || !$scope.password){
+				alert("Por favor, preencha todos os campos");
+				return;
+			}
+			let dados = {
+				"Email": $scope.email,
+				"Password": $scope.password
+			};
+			$http.post('/auth/Login',dados)
+				.then(function (response) {
+					//var authToken = response.data.token;
+					var explicador = response.data.Explicador;
+					var explicando = response.data.Explicando;
+					console.log(explicador);
+					console.log(explicando);
+					//localStorage.setItem('authToken', authToken);
+					if(explicador != null){
+						localStorage.setItem('utilizador', JSON.stringify(explicador));
+						localStorage.setItem('tipo', 'Explicador');
+					}
+					else {
+						localStorage.setItem('utilizador', JSON.stringify(explicando));
+						localStorage.setItem('tipo', 'Explicando');
+					}
+					//console.log(authToken);
+					window.location.href = '/Home/Home'
+				})
+				.catch(function (error){
+					alert("Credenciais inválidas");
+					console.error('Error:', error);
+				});
+		};
+
+		$scope.criarConta = function () {
+			window.location.href='/Home/CConta'
+		}
+	});
+</script>
+</html>

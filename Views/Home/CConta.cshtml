@@ -1,0 +1,235 @@
+﻿@model List<Especialidade>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Criar Conta</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	<link rel="stylesheet" href="~/css/padrao.css">
+	<link rel="stylesheet" href="~/css/criarconta.css">
+</head>
+<body ng-app="caapp" ng-controller="caCtrl">
+<div class="header">
+	<h1 class="textPrincipal">Criar conta</h1>
+</div>
+<div class="body">
+	<div class="containerLimitado">
+		<form name="caccount" style="align-content: center" novalidate>
+			<div class="cainput">
+				<div class="perfil-foto">
+					<img ng-src="{{profileImage}}" ng-show="profileImage" alt="Foto de perfil">
+					<img src="~/img/default-avatar.png" ng-hide="profileImage" alt="Foto de perfil">
+				</div>
+			</div>
+			<div class="cainput">
+				<input type="file" id="fileInput" style="display: none" onchange="angular.element(this).scope().uploadPhoto(this)">
+				<button ng-click="choosePhoto()" class="buttonRedondo">Escolher Foto de Perfil</button>
+			</div>
+			<div class="cainput">
+				<label for="tipo">Tipo de Conta:</label>
+				<select name="tipo" ng-model="tipo" id="tipo" required>
+					<option value="Explicando">Explicando</option>
+					<option value="Explicador">Explicador</option>
+				</select>
+			</div>
+			<div class="cainput" >
+				<label>Nome:</label>
+				<input type="text" id="nome" ng-model="nome" placeholder="Nome" required>
+			</div>
+			<div class="cainput">
+				<label>Email:</label>
+				<input type="email" id="email" ng-model="email" placeholder="Email" required>
+			</div>
+			<div class="cainput">
+				<label>Password:</label>
+				<input id="passwordText" type="password" ng-model="password" placeholder="Password" required>
+			</div>
+			<div class="cainput" id="distritoField" ng-show="tipo === 'Explicando'">
+				<label>Distrito:</label>
+				<input type="text" id="distrito" ng-model="distrito" placeholder="Distrito" required>
+			</div>
+			<div class="cainput" id="idadeField" ng-show="tipo === 'Explicando'">
+				<label>Idade:</label>
+				<input type="number" id="idade" ng-model="idade" placeholder="Idade" required>
+			</div>
+			<div class="cainput" id="descField" ng-show="tipo === 'Explicador'">
+				<label>Descrição:</label>
+				<input type="text" id="desc" ng-model="desc" placeholder="Descrição (opcional)">
+			</div>
+			<div class="cainput" id="espField" ng-show="tipo === 'Explicador'">
+				<label for="esp">Especialidade</label>
+				<select name="esp" ng-model="esp" id="esp" required>
+					<option ng-repeat="esp in especialidades" ng-value="esp">
+						{{esp.Nome}}
+					</option>
+					<!--@foreach (var Esp in Model)
+					{
+						<option ng-value="@Esp">
+							@Esp.Nome
+						</option>
+					}-->
+				</select>
+			</div>
+			<div class="cainput" id="tabelaPreco" ng-show="tipo === 'Explicador'">
+				<table>
+					<tr>
+						<th>Tipo</th>
+						<th>Preço</th>
+					</tr>
+					<tr>
+						<td>Preço por hora</td>
+						<td>
+							<div class="input-wrapper">
+								<input type="text" ng-model="precohora" placeholder="Insira o preço por hora, Ex: 20.00" required>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Preço por mês</td>
+						<td>
+							<div class="input-wrapper">
+								<input type="text" ng-model="precomes" placeholder="Insira o preço por mês, Ex: 20.00">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Preço por ano</td>
+						<td>
+							<div class="input-wrapper">
+								<input type="text" ng-model="precoano" placeholder="Insira o preço por ano, Ex: 20.00">
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div style="width: 40%; margin-left: 6px">
+				<button ng-click="submitForm()" class="buttonRetangular">Criar Conta</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+</body>
+
+<script>
+	var app = angular.module("caapp", []);
+
+	app.controller('caCtrl', function ($scope, $http) {
+		$scope.tipo = 'Explicando';
+		$scope.especialidades = [];
+		$scope.getEsps = function () {
+			$http.get("/api/Especialidades")
+				.then(function (response) {
+					$scope.especialidades = response.data;
+				}, function (error) {
+					console.error("Erro ao buscar especialidades:", error);
+				});
+		}
+		$scope.getEsps();
+
+		$scope.profileImage = '';
+		$scope.selectedFile = null;
+
+		$scope.choosePhoto = function() {
+			document.getElementById('fileInput').click();
+		};
+
+		$scope.uploadPhoto = function(input) {
+			if (input.files && input.files[0]) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					$scope.$apply(function() {
+						$scope.profileImage = e.target.result;
+					});
+				};
+				reader.readAsDataURL(input.files[0]);
+				$scope.selectedFile = input.files[0];
+			}
+		};
+
+		$scope.submitForm = function () {
+			if ($scope.tipo === 'Explicando') {
+				if (!$scope.nome || !$scope.email || !$scope.password || !$scope.distrito || !$scope.idade) {
+					alert("Por favor, preencha todos os campos obrigatórios para Explicando.");
+					return;
+				}
+			}
+			else if ($scope.tipo === 'Explicador') {
+				if (!$scope.nome || !$scope.email || !$scope.password || !$scope.esp || !$scope.precohora) {
+					alert("Por favor, preencha todos os campos obrigatórios para Explicador.");
+					return;
+				}
+			}
+			let data = new FormData();
+
+			let Dados = {
+				Email: $scope.email,
+				Password: $scope.password
+			};
+
+			let Explicador = {};
+			let Explicando = {};
+			let utilizador = {};
+			if ($scope.tipo === 'Explicando') {
+				Dados.TipoDeConta = 2;
+				Explicando.Nome = $scope.nome;
+				Explicando.Distrito = $scope.distrito;
+				Explicando.Idade = $scope.idade;
+				utilizador = {
+					"Dados": Dados,
+					"Explicando": Explicando,
+				};
+			} else {
+				Dados.TipoDeConta = 1;
+				Explicador.Nome = $scope.nome;
+				Explicador.Descricao = $scope.desc;
+				Explicador.EspecialidadeId = $scope.esp.Id;
+				Explicador.PrecoHora = $scope.precohora;
+				Explicador.PrecoMes = $scope.precomes;
+				Explicador.PrecoAno = $scope.precoano;
+				utilizador = {
+					"Dados": Dados,
+					"Explicador": Explicador,
+				};
+			}
+			console.log(Dados);
+
+			
+
+			console.log(utilizador);
+
+			//data.append('conta', new Blob([JSON.stringify(Dados)], { type: "application/json" }));
+
+			/*console.log(data);
+			if ($scope.selectedFile) {
+				data.append('file', $scope.selectedFile);
+			}*/
+
+			const url = "/api/Utilizador/Save";
+
+			$http.post(url, utilizador)
+			.then(function (response) {
+				alert("Conta criada com sucesso!");
+				window.location.href = '/';
+			}, function (error) {
+				alert("Erro ao criar conta: " + error.statusText);
+			});
+		
+			/*$http.post(url, utilizador data, {
+				headers: { 'Content-Type': undefined }
+			}).then(function (response) {
+				alert("Conta criada com sucesso!");
+				window.location.href = '/';
+			}, function (error) {
+				alert("Erro ao criar conta: " + error.statusText);
+			});*/
+		};
+	});
+</script>
+
+</html>

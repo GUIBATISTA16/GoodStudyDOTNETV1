@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <link rel="stylesheet" href="~/css/padrao.css">
+    <link rel="stylesheet" href="~/css/pesquisa.css">
+    <title>Home</title>
+</head>
+<body ng-app="homeApp" ng-controller="homeCtrl">
+    <div class="header home">
+        <div class="headerDivisor">
+            <div class="left">
+                <h1 class="textPrincipal">Seja Bem-Vindo</h1>
+                <h2>{{user.Nome}}</h2>
+            </div>
+            <div class="right">
+                <img ng-src="data:{{user.imageType}};base64,{{user.imageData}}" ng-show="profileImagePresent" alt="Foto de perfil" class="profile-picture" />
+                <img src="{~/img/default-avatar.png}" ng-hide="profileImagePresent" alt="Foto do user" class="profile-picture">
+                <button ng-click="logout()" class="logoutButton"><i class="fas fa-sign-out-alt icone"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="bodyHome">
+        <div ng-show="tipo==='Explicador'" style="display: flex; flex-direction: row">
+            <div class="body30">
+                <h2>Pedidos recebidos</h2>
+            </div>
+            <div class="body70">
+                <div ng-repeat="pedido in pedidosRecebidos" class="pedido-container">
+                    <div class="perfil">
+                        <img ng-src="data:{{pedido.explicando.imageType}};base64,{{pedido.explicando.imageData}}" ng-show="pedido.explicando.imageData" class="perfil-img" />
+                        <img src="{~/img/default-avatar.png}" ng-hide="pedido.explicando.imageData" class="perfil-img">
+                        <div class="info">
+                            <h2>{{pedido.explicando.nome}}</h2>
+                        </div>
+                    </div>
+                    <p class="texto-pedido">{{pedido.texto}}</p>
+                    <div class="botoes">
+                        <button class="btn aceitar" ng-click="responderPedido(pedido,'Accepted')">Aceitar</button>
+                        <button class="btn recusar" ng-click="responderPedido(pedido,'Rejected')">Recusar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-show="tipo==='Explicando'" style="display: flex; flex-direction: row">
+            <div class="body30">
+                <div class="cainput" id="espField">
+                    <label for="esp">Especialidade</label>
+                    <select name="esp" ng-model="esp" id="esp" required>
+                        <option value="">Nenhuma</option>
+                        <option ng-repeat="esp in especialidades" ng-value="esp">
+                            {{esp.Nome}}
+                        </option>
+                    </select>
+                </div>
+                <div class="cainput">
+                    <label>Nome:</label>
+                    <input type="text" id="nome" ng-model="nome" placeholder="Nome" required>
+                </div>
+                <div class="price-slider">
+                    <label>Preço</label>
+                    <div class="min-max">
+                        <span>Min</span>
+                        <span>Max</span>
+                    </div>
+                    <div class="values">
+                        <span>{{ precoMin.toFixed(0) }} €</span>
+                        <span>{{ precoMax.toFixed(0) }} €</span>
+                    </div>
+                    <input type="range" min="0" max="50" step="0.1" ng-model="precoMin" ng-change="updateRange()" class="slider min">
+                    <input type="range" min="0" max="50" step="0.1" ng-model="precoMax" ng-change="updateRange()" class="slider max">
+                </div>
+                <div>
+                    <button ng-click="pesquisa()" class="buttonRedondo">Pesquisar</button>
+                </div>
+            </div>
+            <div class="body70">
+                <div class="explicador-card" ng-repeat="explicador in explicadores">
+                    <img ng-src="data:{{explicador.imageType}};base64,{{explicador.imageData}}" ng-show="explicador.imageData" alt="Foto do explicador" class="explicador-image">
+                    <img src="{~/img/default-avatar.png}" ng-hide="explicador.imageData" alt="Foto do explicador" class="explicador-image">
+                    <div class="explicador-info">
+                        <div class="explicador-header">
+                            <span class="explicador-name">{{ explicador.nome }}</span>
+                            <span class="explicador-price">{{ explicador.precohora }}€/hr</span>
+                        </div>
+                        <span class="explicador-specialty">{{ explicador.especialidade.nome }}</span>
+                    </div>
+                    <button class="buttonRedondo" style="width: 300px" ng-click="openModal(explicador)"
+                            ng-hide="isPedidoEnviado(explicador.id)">
+                        Enviar Pedido
+                    </button>
+                    <button class="buttonRedondo" style="width: 300px; color: #083a82"
+                            ng-show="isPedidoEnviado(explicador.id)">
+                        Enviar Pedido
+                    </button>
+                    <div class="modal-backdrop" ng-show="showModal">
+                        <!-- Popup-->
+                        <div class="modal-content">
+                            <span class="close-button" ng-click="closeModal(texto)">×</span>
+                            <div class="headerDivisor">
+                                <div class="left">
+                                    <h3 style="text-align: left">Enviar Pedido a </h3>
+                                    <h5 style="text-align: left">{{selectedExplicador.nome}}</h5>
+                                </div>
+                                <div class="right" style="margin-right: 10px">
+                                    <img ng-src="data:{{selectedExplicador.imageType}};base64,{{selectedExplicador.imageData}}" ng-show="selectedExplicador.imageData" alt="Foto do explicador" class="modal-image">
+                                    <img src="{~/img/default-avatar.png}" ng-hide="selectedExplicador.imageData" alt="Foto do explicador" class="modal-image">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="texto">Pedido</label>
+                                <textarea id="texto" ng-model="texto" placeholder="Texto (opcional)" rows="3" class="form-control"></textarea>
+                            </div>
+                            <button ng-click="enviarPedido(texto)" class="buttonRedondo">Enviar Pedido</button>
+                            <p class="modal-note">Caso o Explicador aceite o pedido será criado um chat entre os dois automaticamente</p>
+                        </div>
+                    </div><!-- Popup-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    var app = angular.module('homeApp',[]);
+    app.controller('homeCtrl',function ($scope,$http) {
+      //var authToken = localStorage.getItem('authToken');
+      /*if (authToken === null) {
+        window.location.href = '/login';
+      }*/
+      $scope.user = JSON.parse(localStorage.getItem('utilizador'));
+      $scope.tipo = localStorage.getItem('tipo');
+      
+      
+      $scope.especialidades = [];
+      $scope.getEsps = function () {
+            $http.get("/api/Especialidades")
+                .then(function (response) {
+                    $scope.especialidades = response.data;
+                }, function (error) {
+                    console.error("Erro ao buscar especialidades:", error);
+                });
+        };
+      $scope.getEsps();
+
+      $scope.profileImagePresent = true;
+      if ($scope.user.imageData === null){
+        $scope.profileImagePresent = false;
+      }
+      //$http.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;
+
+      $scope.logout = function () {
+        $http.post('/logoutu')
+            .then(function (response) {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('utilizador');
+              window.location.href = '/';
+            })
+            .catch(function (error) {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('utilizador');
+              window.location.href = '/';
+              console.error('Error:', error);
+            });
+      };
+
+      $scope.precoMin = 0;
+      $scope.precoMax = 50;
+
+      $scope.updateRange = function () {
+        if ($scope.precoMin > $scope.precoMax) {
+          var temp = $scope.precoMin;
+          $scope.precoMin = $scope.precoMax;
+          $scope.precoMax = temp;
+        }
+      };
+      $scope.explicadores = [];
+      $scope.pesquisa = function () {
+
+        let request = {
+          "nome": $scope.nome,
+          "precoMin": $scope.precoMin.toFixed(0),
+          "precoMax": $scope.precoMax.toFixed(0)
+        };
+        if ($scope.esp){
+          request.especialidade = $scope.esp;
+        }
+        //console.log(request);
+        $http.post('/api/pesquisa',request)
+                .then(function (response){
+                  $scope.explicadores = response.data;
+                  //console.log($scope.explicadores);
+                })
+                .catch(function (error){
+                  console.error('Error:', error);
+                });
+      };
+      $scope.tipo === 'Explicando' ? $scope.pesquisa() : null;
+
+      $scope.showModal = false;
+      $scope.selectedExplicador = {};
+      $scope.texto = "";
+
+      $scope.openModal = function(explicador) {
+        $scope.selectedExplicador = explicador;
+        $scope.showModal = true;
+        $scope.texto = "";
+      };
+
+      $scope.closeModal = function(texto) {
+        $scope.showModal = false;
+        $scope.texto = "";
+        texto = "";
+        $scope.selectedExplicador = {};
+      };
+
+      $scope.enviarPedido = function(texto) {
+        console.log("Texto do Pedido: ", texto);
+        $scope.texto = texto;
+
+        let pedido = {
+          "explicador": $scope.selectedExplicador,
+          "explicando": $scope.user,
+          "estado": "Waiting",
+          "texto": $scope.texto
+        };
+
+        $http.post('/api/sendPedido', pedido)
+                .then(function (response) {
+                  //console.log(response.data);
+                  $scope.pedidosEnviados.push(pedido);
+                  //console.log($scope.pedidosEnviados)
+                  $scope.texto="";
+                  $scope.closeModal(texto);
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+      };
+
+      $scope.pedidosEnviados = [];
+      $scope.getPedidosEnviados = function () {
+        $http.get('/api/getPedidos/explicando/' + $scope.user.id)
+                .then(function (response){
+                  $scope.pedidosEnviados = response.data;
+                })
+                .then(function (error) {
+                  console.log(error);
+                });
+      };
+      $scope.tipo === 'Explicando' ? $scope.getPedidosEnviados(): null;
+
+      $scope.isPedidoEnviado = function (explicadorId) {
+        return $scope.pedidosEnviados.some(function(pedido) {
+          return pedido.explicador && pedido.explicador.id === explicadorId;
+        });
+      };
+
+      $scope.pedidosRecebidos = [];
+      $scope.getPedidosRecebidos = function () {
+        $http.get('/api/getPedidos/explicador/' + $scope.user.id)
+                .then(function (response){
+                  $scope.pedidosRecebidos = response.data;
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+      };
+      $scope.tipo === 'Explicador' ? $scope.getPedidosRecebidos() : null;
+
+      $scope.responderPedido = function (pedido,resposta) {
+        let answer = {
+          "pedido": pedido,
+          "answer": resposta
+        };
+
+        $http.put('/api/answerPedido',answer)
+                .then(function (response){
+                  //console.log(response.data);
+                  const index = $scope.pedidosRecebidos.indexOf(pedido);
+                  if (index > -1) {
+                    $scope.pedidosRecebidos.splice(index, 1);
+                  }
+                  //console.log($scope.pedidosRecebidos);
+                })
+                .catch(function (error){
+                  console.log(error);
+                });
+      };
+    });
+
+</script>
+
+</html>

@@ -1,0 +1,30 @@
+.containerLimitado{
+    align-items: center;
+    width: 30%;
+}
+
+.input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+.input-wrapper input {
+    width: 100%;
+    padding-right: 15px;
+    text-align: left;
+    font-size: 1em;
+    border: none;
+    outline: none;
+}
+.input-wrapper::after {
+    content: "€";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 1em;
+}
+
+
+
