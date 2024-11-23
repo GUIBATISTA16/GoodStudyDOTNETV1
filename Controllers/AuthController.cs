@@ -11,14 +11,21 @@ namespace GoodStudydotNET.Controllers
         [HttpPost]
         public ActionResult<string> Login([FromBody] Dados dados)
         {
-
-            Utilizador u = UtilizadorRepository.Login(dados);
-            if (u != null)
+            try
             {
-                return Ok(JsonSerializer.Serialize(u));
-            }
+                Utilizador u = UtilizadorRepository.Login(dados);
+                if (u != null)
+                {
+                    return Ok(JsonSerializer.Serialize(u));
+                }
 
-            return BadRequest();
+                return BadRequest();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest(e.Message);
+            }
         }
     }
 }

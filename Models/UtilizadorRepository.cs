@@ -114,55 +114,11 @@ namespace GoodStudydotNET.Models
 
                 if (tipo == 1)
                 {
-                    sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId WHERE idDados = @idDados";
-                    Explicador explicador = new Explicador();
-                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
-                    {
-                        cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
-
-                        
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-
-                                explicador.Id = Utils.SafeGetInt32(reader, 0);
-                                explicador.Nome = Utils.SafeGetString(reader, 1);
-                                explicador.Descricao = Utils.SafeGetString(reader, 2);
-                                explicador.PrecoHora = Utils.SafeGetInt32(reader, 4);
-                                explicador.PrecoMes = Utils.SafeGetInt32(reader, 5);
-                                explicador.PrecoAno = Utils.SafeGetInt32(reader, 6);
-                                explicador.Especialidade = new Especialidade();
-                                explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 8);
-                                explicador.Especialidade.Nome = Utils.SafeGetString(reader, 9);
-                            }
-                        }
-                    }
-                    return new Utilizador(explicador);
+                    return new Utilizador(getExplicador(cnn, id));
                 }
                 else if (tipo == 2)
                 {
-                    sql = "select * from Explicando WHERE idDados = @idDados";
-                    Explicando explicando = new Explicando();
-                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
-                    {
-                        cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
-
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                
-                                explicando.Id = Utils.SafeGetInt32(reader, 0);
-                                explicando.Nome = Utils.SafeGetString(reader, 1);
-                                explicando.Idade = Utils.SafeGetInt32(reader, 2);
-                                explicando.Distrito = Utils.SafeGetString(reader, 3);
-                            }  
-                        }
-                        
-                    }
-                    return new Utilizador(explicando);
+                    return new Utilizador(getExplicando(cnn, id));
                 }
                 else
                 {
@@ -173,5 +129,63 @@ namespace GoodStudydotNET.Models
             return null;
         }
 
+        internal static List<Explicador> Pesquisa(Pesquisa pesquisa)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static Explicador getExplicador(SqlConnection cnn, int id)
+        {
+            string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId WHERE idDados = @idDados";
+            Explicador explicador = new Explicador();
+            using (SqlCommand cmd = new SqlCommand(sql, cnn))
+            {
+                cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
+
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+
+                        explicador.Id = Utils.SafeGetInt32(reader, 0);
+                        explicador.Nome = Utils.SafeGetString(reader, 1);
+                        explicador.Descricao = Utils.SafeGetString(reader, 2);
+                        explicador.PrecoHora = Utils.SafeGetInt32(reader, 4);
+                        explicador.PrecoMes = Utils.SafeGetInt32(reader, 5);
+                        explicador.PrecoAno = Utils.SafeGetInt32(reader, 6);
+                        explicador.Especialidade = new Especialidade();
+                        explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 8);
+                        explicador.Especialidade.Nome = Utils.SafeGetString(reader, 9);
+                    }
+                }
+            }
+            return explicador;
+        }
+
+        private static Explicando getExplicando(SqlConnection cnn, int id)
+        {
+            string sql = "select * from Explicando WHERE idDados = @idDados";
+            Explicando explicando = new Explicando();
+            using (SqlCommand cmd = new SqlCommand(sql, cnn))
+            {
+                cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
+
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+
+                        explicando.Id = Utils.SafeGetInt32(reader, 0);
+                        explicando.Nome = Utils.SafeGetString(reader, 1);
+                        explicando.Idade = Utils.SafeGetInt32(reader, 2);
+                        explicando.Distrito = Utils.SafeGetString(reader, 3);
+                    }
+                }
+
+            }
+            return explicando;
+        }
     }
 }
