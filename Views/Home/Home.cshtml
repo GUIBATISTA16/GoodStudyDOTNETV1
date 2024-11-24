@@ -52,7 +52,7 @@
                     <label for="esp">Especialidade</label>
                     <select name="esp" ng-model="esp" id="esp" required>
                         <option value="">Nenhuma</option>
-                        <option ng-repeat="esp in especialidades" ng-value="esp">
+                        <option ng-repeat="esp in especialidades" ng-value="esp.Id">
                             {{esp.Nome}}
                         </option>
                     </select>
@@ -84,17 +84,17 @@
                     <img src="~/img/default-avatar.png" ng-hide="explicador.imageData" alt="Foto do explicador" class="explicador-image">
                     <div class="explicador-info">
                         <div class="explicador-header">
-                            <span class="explicador-name">{{ explicador.nome }}</span>
-                            <span class="explicador-price">{{ explicador.precohora }}€/hr</span>
+                            <span class="explicador-name">{{ explicador.Nome }}</span>
+                            <span class="explicador-price">{{ explicador.PrecoHora }}€/hr</span>
                         </div>
-                        <span class="explicador-specialty">{{ explicador.especialidade.nome }}</span>
+                        <span class="explicador-specialty">{{ explicador.Especialidade.Nome }}</span>
                     </div>
                     <button class="buttonRedondo" style="width: 300px" ng-click="openModal(explicador)"
                             ng-hide="isPedidoEnviado(explicador.id)">
                         Enviar Pedido
                     </button>
                     <button class="buttonRedondo" style="width: 300px; color: #083a82"
-                            ng-show="isPedidoEnviado(explicador.id)">
+                            ng-show="isPedidoEnviado(explicador.Id)">
                         Enviar Pedido
                     </button>
                     <div class="modal-backdrop" ng-show="showModal">
@@ -104,7 +104,7 @@
                             <div class="headerDivisor">
                                 <div class="left">
                                     <h3 style="text-align: left">Enviar Pedido a </h3>
-                                    <h5 style="text-align: left">{{selectedExplicador.nome}}</h5>
+                                    <h5 style="text-align: left">{{selectedExplicador.Nome}}</h5>
                                 </div>
                                 <div class="right" style="margin-right: 10px">
                                     <img ng-src="data:{{selectedExplicador.imageType}};base64,{{selectedExplicador.imageData}}" ng-show="selectedExplicador.imageData" alt="Foto do explicador" class="modal-image">
@@ -159,11 +159,13 @@
             .then(function (response) {
               //localStorage.removeItem('authToken');
               localStorage.removeItem('utilizador');
+              localStorage.removeItem('tipo');
               window.location.href = '/';
             })
             .catch(function (error) {
               //localStorage.removeItem('authToken');
               localStorage.removeItem('utilizador');
+              localStorage.removeItem('tipo');
               window.location.href = '/';
               console.error('Error:', error);
             });
@@ -182,16 +184,16 @@
       $scope.explicadores = [];
       $scope.pesquisa = function () {
 
-        let request = {
-          "nome": $scope.nome,
-          "precoMin": $scope.precoMin.toFixed(0),
-          "precoMax": $scope.precoMax.toFixed(0)
+        let pesquisa = {
+          "Nome": $scope.nome,
+          "PrecoMin": $scope.precoMin.toFixed(0),
+          "PrecoMax": $scope.precoMax.toFixed(0)
         };
         if ($scope.esp){
-          request.especialidade = $scope.esp;
+          pesquisa.EspId = $scope.esp;
         }
         //console.log(request);
-        $http.post('/api/pesquisa',request)
+        $http.post('/api/Utilizador/Pesquisa',pesquisa)
                 .then(function (response){
                   $scope.explicadores = response.data;
                   //console.log($scope.explicadores);
@@ -257,7 +259,7 @@
 
       $scope.isPedidoEnviado = function (explicadorId) {
         return $scope.pedidosEnviados.some(function(pedido) {
-          return pedido.explicador && pedido.explicador.id === explicadorId;
+          return pedido.Explicador && pedido.Explicador.Id === explicadorId;
         });
       };
 

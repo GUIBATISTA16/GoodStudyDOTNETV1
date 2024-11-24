@@ -114,7 +114,23 @@ namespace GoodStudydotNET.Models
 
                 if (tipo == 1)
                 {
-                    return new Utilizador(getExplicador(cnn, id));
+                    sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId WHERE idDados = @idDados";
+                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
+                    {
+                        cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Explicador e = getExplicador(reader);
+                                if (e.Nome != "")
+                                {
+                                    return new Utilizador(e);
+                                }
+                                return null;
+                            }
+                        }
+                    }
                 }
                 else if (tipo == 2)
                 {
@@ -131,36 +147,101 @@ namespace GoodStudydotNET.Models
 
         internal static List<Explicador> Pesquisa(Pesquisa pesquisa)
         {
-            throw new NotImplementedException();
-        }
-
-        private static Explicador getExplicador(SqlConnection cnn, int id)
-        {
-            string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId WHERE idDados = @idDados";
-            Explicador explicador = new Explicador();
-            using (SqlCommand cmd = new SqlCommand(sql, cnn))
+            List<Explicador> list = new List<Explicador>();
+            using (SqlConnection cnn = new SqlConnection(connectionString))
             {
-                cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
-
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                cnn.Open();
+                if (pesquisa.EspId != -1)
                 {
-                    while (reader.Read())
+                    string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId " +
+                                 "WHERE UPPER(ex.nome) like UPPER(@nome+'%') " +
+                                 "AND ex.precoHora BETWEEN @precoMin and @precoMax " +
+                                 "AND ex.especialidadeId = @espId";
+                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
                     {
-
-                        explicador.Id = Utils.SafeGetInt32(reader, 0);
-                        explicador.Nome = Utils.SafeGetString(reader, 1);
-                        explicador.Descricao = Utils.SafeGetString(reader, 2);
-                        explicador.PrecoHora = Utils.SafeGetInt32(reader, 4);
-                        explicador.PrecoMes = Utils.SafeGetInt32(reader, 5);
-                        explicador.PrecoAno = Utils.SafeGetInt32(reader, 6);
-                        explicador.Especialidade = new Especialidade();
-                        explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 8);
-                        explicador.Especialidade.Nome = Utils.SafeGetString(reader, 9);
+                        cmd.Parameters.Add("@nome", SqlDbType.NVarChar).Value = pesquisa.Nome;
+                        cmd.Parameters.Add("@precoMin", SqlDbType.Int).Value = pesquisa.PrecoMin;
+                        cmd.Parameters.Add("@precoMax", SqlDbType.Int).Value = pesquisa.PrecoMax;
+                        cmd.Parameters.Add("@espId", SqlDbType.Int).Value = pesquisa.EspId;
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                try
+                                {
+                                    Explicador e = getExplicador(reader);
+                                    if (e.Nome != "")
+                                    {
+                                        list.Add(getExplicador(reader));
+                                    }
+                                }
+                                catch (Exception exception)
+                                {
+                                    Console.WriteLine(exception);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
+                else
+                {
+                    string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId " +
+                                 "WHERE UPPER(ex.nome) like UPPER(@nome+'%') " +
+                                 "AND ex.precoHora BETWEEN @precoMin and @precoMax";
+                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
+                    {
+                        cmd.Parameters.Add("@nome", SqlDbType.NVarChar).Value = pesquisa.Nome;
+                        cmd.Parameters.Add("@precoMin", SqlDbType.Int).Value = pesquisa.PrecoMin;
+                        cmd.Parameters.Add("@precoMax", SqlDbType.Int).Value = pesquisa.PrecoMax;
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                try
+                                {
+                                    Explicador e = getExplicador(reader);
+                                    if (e.Nome != "")
+                                    {
+                                        list.Add(getExplicador(reader));
+                                    }
+                                }
+                                catch (Exception exception)
+                                {
+                                    Console.WriteLine(exception);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                cnn.Close();
             }
-            return explicador;
+
+            return list;
+        }
+
+        private static Explicador getExplicador(SqlDataReader reader)
+        {
+            Explicador explicador = new Explicador();
+            try
+            {
+                explicador.Id = Utils.SafeGetInt32(reader, 0);
+                explicador.Nome = Utils.SafeGetString(reader, 1);
+                explicador.Descricao = Utils.SafeGetString(reader, 2);
+                explicador.PrecoHora = Utils.SafeGetInt32(reader, 4);
+                explicador.PrecoMes = Utils.SafeGetInt32(reader, 5);
+                explicador.PrecoAno = Utils.SafeGetInt32(reader, 6);
+                explicador.Especialidade = new Especialidade();
+                explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 8);
+                explicador.Especialidade.Nome = Utils.SafeGetString(reader, 9);
+                return explicador;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
         }
 
         private static Explicando getExplicando(SqlConnection cnn, int id)
