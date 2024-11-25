@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GoodStudydotNET.Models;
+using GoodStudydotNET.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoodStudydotNET.Controllers

@@ -1,14 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using GoodStudydotNET.Models;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.SqlTypes;
 
-namespace GoodStudydotNET.Models
+namespace GoodStudydotNET.Repositories
 {
     public class UtilizadorRepository
     {
         private static string connectionString = "data source=DESKTOP-B8E792M\\SQLEXPRESS; initial catalog =GoodStudy; uid=sa; pwd=root;TrustServerCertificate=True";
 
-        public static Utilizador AddUtilizador(Dados dados,Explicador? explicador, Explicando? explicando)
+        public static Utilizador AddUtilizador(Dados dados, Explicador? explicador, Explicando? explicando)
         {
             string sql = "insert into Dados (email, password,tipoDeConta) output INSERTED.ID values(@email,@pass,@tipo)";
 
@@ -19,7 +20,7 @@ namespace GoodStudydotNET.Models
                     int id;
                     cnn.Open();
 
-                    
+
                     using (SqlCommand cmd = new SqlCommand(sql, cnn))
                     {
                         cmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = dados.Email;
@@ -55,7 +56,7 @@ namespace GoodStudydotNET.Models
                         }
                         return new Utilizador(dados, explicador);
                     }
-                    else if(dados.TipoDeConta == 2 && explicando != null)
+                    else if (dados.TipoDeConta == 2 && explicando != null)
                     {
                         sql =
                             "insert into Explicando (nome,idade,distrito,idDados)" +
@@ -74,7 +75,7 @@ namespace GoodStudydotNET.Models
                         return new Utilizador(dados, explicando);
                     }
 
-                    
+
                 }
                 catch (Exception ex)
                 {

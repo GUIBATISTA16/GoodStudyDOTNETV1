@@ -90,7 +90,7 @@
                         <span class="explicador-specialty">{{ explicador.Especialidade.Nome }}</span>
                     </div>
                     <button class="buttonRedondo" style="width: 300px" ng-click="openModal(explicador)"
-                            ng-hide="isPedidoEnviado(explicador.id)">
+                            ng-hide="isPedidoEnviado(explicador.Id)">
                         Enviar Pedido
                     </button>
                     <button class="buttonRedondo" style="width: 300px; color: #083a82"
@@ -226,17 +226,17 @@
         $scope.texto = texto;
 
         let pedido = {
-          "explicador": $scope.selectedExplicador,
-          "explicando": $scope.user,
-          "estado": "Waiting",
-          "texto": $scope.texto
+          "ExplicadorId": $scope.selectedExplicador.Id,
+          "ExplicandoId": $scope.user.Id,
+          "Estado": "Waiting",
+          "Texto": $scope.texto
         };
 
-        $http.post('/api/sendPedido', pedido)
+        $http.post('/api/Pedido/SendPedido', pedido)
                 .then(function (response) {
                   //console.log(response.data);
-                  $scope.pedidosEnviados.push(pedido);
-                  //console.log($scope.pedidosEnviados)
+                  $scope.pedidosEnviados.push(response.data);
+                  console.log($scope.pedidosEnviados)
                   $scope.texto="";
                   $scope.closeModal(texto);
                 })
@@ -247,7 +247,7 @@
 
       $scope.pedidosEnviados = [];
       $scope.getPedidosEnviados = function () {
-        $http.get('/api/getPedidos/explicando/' + $scope.user.id)
+        $http.get('/api/Pedido/GetPedidosExplicando/' + $scope.user.Id)
                 .then(function (response){
                   $scope.pedidosEnviados = response.data;
                 })
@@ -259,7 +259,7 @@
 
       $scope.isPedidoEnviado = function (explicadorId) {
         return $scope.pedidosEnviados.some(function(pedido) {
-          return pedido.Explicador && pedido.Explicador.Id === explicadorId;
+          return pedido && pedido.ExplicadorId === explicadorId;
         });
       };
 

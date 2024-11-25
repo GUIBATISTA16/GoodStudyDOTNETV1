@@ -23,7 +23,6 @@ namespace GoodStudydotNET.Models
 
         public Explicador() { }
 
-        // Construtor parametrizado
         public Explicador(
             int id,
             string nome,

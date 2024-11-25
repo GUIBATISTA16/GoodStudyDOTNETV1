@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GoodStudydotNET.Models;
+using GoodStudydotNET.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

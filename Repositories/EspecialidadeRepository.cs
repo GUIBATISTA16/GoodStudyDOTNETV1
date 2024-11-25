@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using GoodStudydotNET.Models;
+using Microsoft.Data.SqlClient;
 
-namespace GoodStudydotNET.Models
+namespace GoodStudydotNET.Repositories
 {
     public class EspecialidadeRepository
     {
@@ -28,12 +29,13 @@ namespace GoodStudydotNET.Models
                     e.Nome = Utils.SafeGetString(reader, 1);
                     _especialidades.Add(e);
                 }
+                sqlconn.Close();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-            
+
             return _especialidades;
         }
     }
