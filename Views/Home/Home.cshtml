@@ -32,13 +32,13 @@
             <div class="body70">
                 <div ng-repeat="pedido in pedidosRecebidos" class="pedido-container">
                     <div class="perfil">
-                        <img ng-src="data:{{pedido.explicando.imageType}};base64,{{pedido.explicando.imageData}}" ng-show="pedido.explicando.imageData" class="perfil-img" />
-                        <img src="~/img/default-avatar.png" ng-hide="pedido.explicando.imageData" class="perfil-img">
+                        <img ng-src="data:{{pedido.Explicando.imageType}};base64,{{pedido.Explicando.imageData}}" ng-show="pedido.Explicando.imageData" class="perfil-img" />
+                        <img src="~/img/default-avatar.png" ng-hide="pedido.Explicando.imageData" class="perfil-img">
                         <div class="info">
-                            <h2>{{pedido.explicando.nome}}</h2>
+                            <h2>{{pedido.Explicando.Nome}}</h2>
                         </div>
                     </div>
-                    <p class="texto-pedido">{{pedido.texto}}</p>
+                    <p class="texto-pedido">{{pedido.Texto}}</p>
                     <div class="botoes">
                         <button class="btn aceitar" ng-click="responderPedido(pedido,'Accepted')">Aceitar</button>
                         <button class="btn recusar" ng-click="responderPedido(pedido,'Rejected')">Recusar</button>
@@ -229,7 +229,8 @@
           "ExplicadorId": $scope.selectedExplicador.Id,
           "ExplicandoId": $scope.user.Id,
           "Estado": "Waiting",
-          "Texto": $scope.texto
+          "Texto": $scope.texto,
+          "Explicando": $scope.user
         };
 
         $http.post('/api/Pedido/SendPedido', pedido)
@@ -265,7 +266,7 @@
 
       $scope.pedidosRecebidos = [];
       $scope.getPedidosRecebidos = function () {
-        $http.get('/api/getPedidos/explicador/' + $scope.user.id)
+        $http.get('/api/Pedido/GetPedidosExplicador/' + $scope.user.Id)
                 .then(function (response){
                   $scope.pedidosRecebidos = response.data;
                 })
@@ -277,11 +278,11 @@
 
       $scope.responderPedido = function (pedido,resposta) {
         let answer = {
-          "pedido": pedido,
-          "answer": resposta
+          "Pedido": pedido,
+          "Answer": resposta
         };
 
-        $http.put('/api/answerPedido',answer)
+        $http.put('/api/Pedido/AnswerPedido',answer)
                 .then(function (response){
                   //console.log(response.data);
                   const index = $scope.pedidosRecebidos.indexOf(pedido);

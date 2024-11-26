@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GoodStudydotNET.Models
+namespace GoodStudydotNET.Models.Requests
 {
     public class Utilizador
     {
@@ -11,26 +11,28 @@ namespace GoodStudydotNET.Models
 
         public Explicando? Explicando { get; set; }
 
+        public IFormFile image { get; set; }
+
         public Utilizador(Dados dados, Explicador explicador)
         {
-            this.Dados= dados;
-            this.Explicador= explicador;
+            Dados = dados;
+            Explicador = explicador;
         }
 
         public Utilizador(Dados dados, Explicando explicando)
         {
-            this.Dados = dados;
-            this.Explicando = explicando;
+            Dados = dados;
+            Explicando = explicando;
         }
 
         public Utilizador(Explicador explicador)
         {
-            this.Explicador = explicador;
+            Explicador = explicador;
         }
 
         public Utilizador(Explicando explicando)
         {
-            this.Explicando = explicando;
+            Explicando = explicando;
         }
 
         public Utilizador()
@@ -40,9 +42,9 @@ namespace GoodStudydotNET.Models
         [JsonConstructor]
         public Utilizador(Dados dados, Explicador? explicador, Explicando? explicando)
         {
-            this.Dados = dados;
-            this.Explicador = explicador;
-            this.Explicando = explicando;
+            Dados = dados;
+            Explicador = explicador;
+            Explicando = explicando;
         }
     }
 }

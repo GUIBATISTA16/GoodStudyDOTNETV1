@@ -1,4 +1,5 @@
 ﻿using GoodStudydotNET.Models;
+using GoodStudydotNET.Models.Requests;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.SqlTypes;

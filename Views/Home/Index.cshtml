@@ -59,8 +59,8 @@
 	app.controller('loginCtrl', function ($scope, $http) {
 		localStorage.removeItem('authToken');
 		localStorage.removeItem('utilizador');
-		$scope.email= "gui@email.com";//testes retirar
-		$scope.password= "g123";//testes retirar
+		$scope.email= "duarte@email.com";//testes retirar
+		$scope.password= "d123";//testes retirar
 		$scope.login = function (){
 			if(!$scope.email || !$scope.password){
 				alert("Por favor, preencha todos os campos");

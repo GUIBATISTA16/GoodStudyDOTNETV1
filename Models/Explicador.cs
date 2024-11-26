@@ -42,5 +42,23 @@ namespace GoodStudydotNET.Models
             PrecoAno = precoAno;
             Especialidade = especialidade;
         }
+
+        public Explicador(
+            int id,
+            string nome,
+            string descricao,
+            int especialidadeId,
+            int precoHora,
+            int precoMes,
+            int precoAno)
+        {
+            Id = id;
+            Nome = nome;
+            Descricao = descricao;
+            EspecialidadeId = especialidadeId;
+            PrecoHora = precoHora;
+            PrecoMes = precoMes;
+            PrecoAno = precoAno;
+        }
     }
 }

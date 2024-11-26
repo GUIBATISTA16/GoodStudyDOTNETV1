@@ -1,4 +1,4 @@
-﻿namespace GoodStudydotNET.Models
+﻿namespace GoodStudydotNET.Models.Requests
 {
     public class Pesquisa
     {

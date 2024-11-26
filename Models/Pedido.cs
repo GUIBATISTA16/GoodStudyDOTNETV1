@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace GoodStudydotNET.Models
 {
@@ -11,6 +12,8 @@ namespace GoodStudydotNET.Models
         public string Estado { get; set; }
         public string Texto { get; set; }
         public DateTime Data { get; set; }
+
+        public Explicando Explicando { get; set; }
 
         public Pedido () { }
 
