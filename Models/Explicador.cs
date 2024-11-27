@@ -19,6 +19,12 @@ namespace GoodStudydotNET.Models
         public int PrecoMes { get; set; }
         public int PrecoAno { get; set; }
 
+        public byte[] imageData { get; set; }
+
+        public string imageType { get; set; }
+
+        public string imageName { get; set; }
+
         public Especialidade Especialidade { get; set; }
 
         public Explicador() { }
@@ -31,7 +37,10 @@ namespace GoodStudydotNET.Models
             int precoHora,
             int precoMes,
             int precoAno,
-            Especialidade especialidade)
+            Especialidade especialidade,
+            byte[]? imageData, 
+            string? imageType, 
+            string? imageName)
         {
             Id = id;
             Nome = nome;
@@ -41,6 +50,9 @@ namespace GoodStudydotNET.Models
             PrecoMes = precoMes;
             PrecoAno = precoAno;
             Especialidade = especialidade;
+            this.imageData = imageData;
+            this.imageType = imageType;
+            this.imageName = imageName;
         }
 
         public Explicador(
@@ -50,7 +62,10 @@ namespace GoodStudydotNET.Models
             int especialidadeId,
             int precoHora,
             int precoMes,
-            int precoAno)
+            int precoAno,
+            byte[]? imageData,
+            string? imageType,
+            string? imageName)
         {
             Id = id;
             Nome = nome;
@@ -59,6 +74,9 @@ namespace GoodStudydotNET.Models
             PrecoHora = precoHora;
             PrecoMes = precoMes;
             PrecoAno = precoAno;
+            this.imageData = imageData;
+            this.imageType = imageType;
+            this.imageName = imageName;
         }
     }
 }

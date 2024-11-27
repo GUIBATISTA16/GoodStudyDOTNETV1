@@ -11,7 +11,7 @@ namespace GoodStudydotNET.Controllers
     public class UtilizadorController : Controller
     {
         [HttpPost]
-        public ActionResult<Utilizador> Save([FromBody] Utilizador utilizador)
+        public ActionResult<string> Save([FromBody] Utilizador utilizador)
         {
             try
             {
@@ -22,7 +22,7 @@ namespace GoodStudydotNET.Controllers
                 }
                 else
                 {
-                    return Created("Conta Criada", u);
+                    return Created("Conta Criada", JsonSerializer.Serialize(u));
                 }
             }
             catch (Exception e)
@@ -31,6 +31,30 @@ namespace GoodStudydotNET.Controllers
                 return BadRequest(e.Message);
             }
             
+        }
+
+        [HttpPost("{tipo}/{id}")]
+        public ActionResult<string> UploadImage(IFormFile image,int tipo,int id)
+        {
+            try
+            {
+                if ((tipo != 1 && tipo != 2) || id < 0 || image == null || image.Length == 0)
+                {
+                    return BadRequest("Invalid Data");
+                }
+                string code = UtilizadorRepository.UploadImage(image, tipo, id);
+                if (code != "")
+                {
+                    return BadRequest(code);
+                }
+
+                return Ok("Image uploaded");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest("Error uploading image");
+            }
         }
 
         [HttpPost]

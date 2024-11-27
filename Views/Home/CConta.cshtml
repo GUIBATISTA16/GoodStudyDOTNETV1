@@ -165,7 +165,7 @@
 					return;
 				}
 			}
-			let data = new FormData();
+			//let data = new FormData();
 
 			let Dados = {
 				Email: $scope.email,
@@ -215,8 +215,35 @@
 
 			$http.post(url, utilizador)
 			.then(function (response) {
-				alert("Conta criada com sucesso!");
-				window.location.href = '/';
+				//alert("Conta criada com sucesso!");
+				if (!$scope.selectedFile){
+					//window.location.href = '/';
+				}
+				else{
+					var conta;
+					var tipo;
+					if(response.data.Explicando){
+						conta = response.data.Explicando;
+						tipo = 2;
+					}
+					else if(response.data.Explicador){
+						conta = response.data.Explicador;
+						tipo = 1;
+					}
+					var formData = new FormData();
+					formData.append('image', $scope.selectedFile);
+					$http.post('/api/Utilizador/UploadImage/' + tipo + '/' + conta.Id,formData,
+						{
+							headers: { 'Content-Type': undefined }
+						})
+						.then(function(response2){
+							//window.location.href = '/';
+						})
+						.catch(function(error){
+							console.log(error);
+							//window.location.href = '/';
+						});
+				}
 			}, function (error) {
 				alert("Erro ao criar conta: " + error.statusText);
 			});

@@ -31,7 +31,7 @@ namespace GoodStudydotNET.Repositories
 
                         id = (int)cmd.ExecuteScalar();
                         if (id > 0)
-                            Console.WriteLine("Row inserted!!");
+                            dados.Id = id;
                         else
                             return null;
                     }
@@ -39,7 +39,7 @@ namespace GoodStudydotNET.Repositories
                     if (dados.TipoDeConta == 1 && explicador != null)
                     {
                         sql =
-                            "insert into Explicador (nome,descricao,especialidadeId,precoHora,precoMes,precoAno,idDados)" +
+                            "insert into Explicador (nome,descricao,especialidadeId,precoHora,precoMes,precoAno,idDados) output inserted.id" +
                             " values(@nome,@desc,@espId,@precoHora,@precoMes,@precoAno,@idDados)";
 
                         using (SqlCommand cmd = new SqlCommand(sql, cnn))
@@ -52,15 +52,14 @@ namespace GoodStudydotNET.Repositories
                             cmd.Parameters.Add("@precoAno", SqlDbType.Int).Value = explicador.PrecoAno;
                             cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
 
-
-                            cmd.ExecuteNonQuery();
+                            explicador.Id = (int)cmd.ExecuteScalar();
                         }
                         return new Utilizador(dados, explicador);
                     }
                     else if (dados.TipoDeConta == 2 && explicando != null)
                     {
                         sql =
-                            "insert into Explicando (nome,idade,distrito,idDados)" +
+                            "insert into Explicando (nome,idade,distrito,idDados) output inserted.id" +
                             " values(@nome,@idade,@distrito,@idDados)";
 
                         using (SqlCommand cmd = new SqlCommand(sql, cnn))
@@ -71,7 +70,7 @@ namespace GoodStudydotNET.Repositories
                             cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
 
 
-                            cmd.ExecuteNonQuery();
+                            explicando.Id = (int)cmd.ExecuteScalar();
                         }
                         return new Utilizador(dados, explicando);
                     }
@@ -89,6 +88,68 @@ namespace GoodStudydotNET.Repositories
 
         }
 
+        public static string UploadImage(IFormFile image,int tipo, int id)
+        {
+            string sql = "insert into Images (imageData, imageName, imageType) output Inserted.id values (@ImageData, @ImageName, @ImageType)";
+            int idFoto = 0;
+            using (SqlConnection cnn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    cnn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql, cnn))
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            memoryStream.Position = 0;
+                            image.CopyTo(memoryStream);
+                            byte[] imageData = memoryStream.ToArray();
+
+                            cmd.Parameters.Add("@ImageData", SqlDbType.VarBinary).Value = imageData;
+                            cmd.Parameters.Add("@ImageName", SqlDbType.NVarChar).Value = image.FileName;
+                            cmd.Parameters.Add("@ImageType", SqlDbType.NVarChar).Value = image.ContentType;
+
+                            idFoto = (int)cmd.ExecuteScalar();
+                            if (idFoto > 0)
+                                Console.WriteLine("Row inserted!!");
+                            else
+                                return "Error storing image";
+                        }
+                    }
+
+                    if (tipo == 1)
+                    {
+                        sql = "update Explicador set idFoto = @idFoto where id = @id";
+                    }
+                    else 
+                    {
+                        sql = "update Explicando set idFoto = @idFoto where id = @id";
+                    }
+
+                    using (SqlCommand cmd = new SqlCommand(sql,cnn))
+                    {
+                        cmd.Parameters.Add("@idFoto", SqlDbType.Int).Value = idFoto;
+                        cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
+
+                         int rows = cmd.ExecuteNonQuery();
+                         if (rows == 1)
+                         {
+                             return "";
+                         }
+                         else
+                         {
+                             return "Error updating user data";
+                         }
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    return ex.Message;
+                }
+            }
+        }
         public static Utilizador Login(Dados dados)
         {
             string sql = "select d.id,d.tipoDeConta from Dados d WHERE email = @email AND password = @pass";
@@ -116,7 +177,8 @@ namespace GoodStudydotNET.Repositories
 
                 if (tipo == 1)
                 {
-                    sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId WHERE idDados = @idDados";
+                    sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId left join Images i on i.id = ex.idFoto " +
+                          "WHERE idDados = @idDados";
                     using (SqlCommand cmd = new SqlCommand(sql, cnn))
                     {
                         cmd.Parameters.Add("@idDados", SqlDbType.Int).Value = id;
@@ -155,7 +217,9 @@ namespace GoodStudydotNET.Repositories
                 cnn.Open();
                 if (pesquisa.EspId != -1)
                 {
-                    string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId " +
+                    string sql = "select * from Explicador ex " +
+                                 "join Especialidades es on es.id = ex.especialidadeId " +
+                                 "left join Images i on i.id = ex.idFoto " +
                                  "WHERE UPPER(ex.nome) like UPPER(@nome+'%') " +
                                  "AND ex.precoHora BETWEEN @precoMin and @precoMax " +
                                  "AND ex.especialidadeId = @espId";
@@ -188,7 +252,9 @@ namespace GoodStudydotNET.Repositories
                 }
                 else
                 {
-                    string sql = "select * from Explicador ex join Especialidades es on es.id = ex.especialidadeId " +
+                    string sql = "select * from Explicador ex " +
+                                 "join Especialidades es on es.id = ex.especialidadeId " +
+                                 "left join Images i on i.id = ex.idFoto " +
                                  "WHERE UPPER(ex.nome) like UPPER(@nome+'%') " +
                                  "AND ex.precoHora BETWEEN @precoMin and @precoMax";
                     using (SqlCommand cmd = new SqlCommand(sql, cnn))
@@ -235,8 +301,11 @@ namespace GoodStudydotNET.Repositories
                 explicador.PrecoMes = Utils.SafeGetInt32(reader, 5);
                 explicador.PrecoAno = Utils.SafeGetInt32(reader, 6);
                 explicador.Especialidade = new Especialidade();
-                explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 8);
-                explicador.Especialidade.Nome = Utils.SafeGetString(reader, 9);
+                explicador.Especialidade.Id = Utils.SafeGetInt32(reader, 9);
+                explicador.Especialidade.Nome = Utils.SafeGetString(reader, 10);
+                explicador.imageData = Utils.SafeGetByteArray(reader, 12);
+                explicador.imageName = Utils.SafeGetString(reader, 13);
+                explicador.imageType = Utils.SafeGetString(reader, 14);
                 return explicador;
             }
             catch (Exception e)
@@ -248,7 +317,7 @@ namespace GoodStudydotNET.Repositories
 
         private static Explicando getExplicando(SqlConnection cnn, int id)
         {
-            string sql = "select * from Explicando WHERE idDados = @idDados";
+            string sql = "select * from Explicando ex left join Images i on i.id = ex.idFoto WHERE idDados = @idDados";
             Explicando explicando = new Explicando();
             using (SqlCommand cmd = new SqlCommand(sql, cnn))
             {
@@ -264,6 +333,9 @@ namespace GoodStudydotNET.Repositories
                         explicando.Nome = Utils.SafeGetString(reader, 1);
                         explicando.Idade = Utils.SafeGetInt32(reader, 2);
                         explicando.Distrito = Utils.SafeGetString(reader, 3);
+                        explicando.imageData = Utils.SafeGetByteArray(reader, 7);
+                        explicando.imageName = Utils.SafeGetString(reader, 8);
+                        explicando.imageType = Utils.SafeGetString(reader, 9);
                     }
                 }
 

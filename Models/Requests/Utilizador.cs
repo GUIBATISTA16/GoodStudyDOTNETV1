@@ -11,8 +11,6 @@ namespace GoodStudydotNET.Models.Requests
 
         public Explicando? Explicando { get; set; }
 
-        public IFormFile image { get; set; }
-
         public Utilizador(Dados dados, Explicador explicador)
         {
             Dados = dados;

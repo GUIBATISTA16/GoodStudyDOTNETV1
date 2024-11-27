@@ -90,7 +90,7 @@ namespace GoodStudydotNET.Repositories
         internal static List<Pedido> GetPedidosExplicador(int id)
         {
             List<Pedido> list = new List<Pedido>();
-            string sql = "select * from Pedidos p join Explicando ex on ex.id = p.explicando where explicador = @id AND estado = 'Waiting'";
+            string sql = "select * from Pedidos p join Explicando ex on ex.id = p.explicando left join Images i on i.id = ex.idFoto where explicador = @id AND estado = 'Waiting'";
             try
             {
                 using (SqlConnection cnn = new SqlConnection(connectionString))
@@ -118,6 +118,9 @@ namespace GoodStudydotNET.Repositories
                                 e.Nome = Utils.SafeGetString(reader, 7);
                                 e.Idade = Utils.SafeGetInt32(reader, 8);
                                 e.Distrito = Utils.SafeGetString(reader, 9);
+                                e.imageData = Utils.SafeGetByteArray(reader, 13);
+                                e.imageName = Utils.SafeGetString(reader, 14);
+                                e.imageType = Utils.SafeGetString(reader, 15);
                                 p.Explicando = e;
                                 list.Add(p);
                             }
